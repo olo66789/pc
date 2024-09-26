@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deafult</title>
+    <link rel="icon" href="https://endorfy.com/wp-content/products/EY2A011_Arx-500-ARGB/Media%20(pictures)/_PRODUCT-HERO/EY2A011-endorfy-arx-500-argb-product-hero.d20230512-u101747.webp" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2a2d2f;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .product-list {
+            width: 70%;
+            max-width: 800px;
+            background-color: #181a1b;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-item {
+            background-color: #1c1e1f;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .product-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #fff;
+        }
+
+        .product-price {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #ddd;
+            cursor: pointer;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background-color: #2b2f31;
+            color: #fff;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #777;
+        }
+
+        .description-modal, .variants-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .description-content, .variants-content {
+            background-color: #181a1b;
+            color: #fff;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+            margin: 50px auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .variants-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .variant-option {
+            background-color: #202325;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            width: 200px;
+            text-align: left;
+        }
+
+        .variant-option:hover {
+            background-color: #2b2f31;
+        }
+
+        .variant-name {
+            font-weight: bold;
+        }
+
+        .variant-price {
+            font-weight: normal;
+            color: #ddd;
+        }
+
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .old-price {
+            pointer-events: none;
+        }
+
+        .edit-price {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="file-name-header"></h1>
+    <div class="product-list" id="product-list"></div>
+    <div class="total-price" id="total-price">Suma: 0 PLN</div>
+
+    <div id="description-modal" class="description-modal">
+        <div class="description-content">
+            <span id="close-description-modal" class="close-modal">&times;</span>
+            <div id="description-text"></div>
+        </div>
+    </div>
+
+    <div id="variants-modal" class="description-modal">
+        <div class="description-content">
+            <span id="close-variants-modal" class="close-modal">&times;</span>
+            <div id="variants-text"></div>
+        </div>
+    </div>
+
+    <script>
+        let totalSum = 0;
+        
+            const products = [
+            {
+                name: "PROCESOR",
+                variants: {
+                    var1: {
+                        description: "AMD Ryzen 5 7600X",
+                        price: 847.80,
+                        proUrl: "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7600x.html"
+                    },
+                    var2: {
+                        description: "AMD Ryzen 7 7700X",
+                        price: 1148.83,
+                        proUrl: "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700x.html"
+                    },
+                    var3: {
+                        description: "AMD Ryzen 9 7900X",
+                        price: 1383.83,
+                        proUrl: "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700x.html"
+                    },
+                    var4: {
+                        description: "AMD Ryzen 7 7800X3D",
+                        price: 1724.99,
+                        proUrl: "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html"
+                    },
+                    var5: {
+                        description: "AMD Ryzen 9 7900X3D",
+                        price: 1728.00,
+                        proUrl: "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-9-7900x3d.html"
+                    },
+                },
+                defaultvar: "var2",
+                descript: `
+                    <strong>AMD Ryzen 5 7600X</strong><br>
+                    Taktowanie rdzenia: 4.7 GHz (5.3 GHz turbo)<br>
+                    Liczba rdzeni: 6 rdzeni<br>
+                    Liczba wątków: 12 wątków<br>
+                    Cache:38 MB<br><br>
+
+                    <strong>AMD Ryzen 7 7700X</strong><br>
+                    Taktowanie rdzenia: 4.5 GHz (5.4 GHz turbo)<br>
+                    Liczba rdzeni: 8 rdzeni<br>
+                    Liczba wątków: 16 wątków<br>
+                    Cache:40 MB<br><br>
+
+                    <strong>AMD Ryzen 9 7900X</strong><br>
+                    Taktowanie rdzenia: 4.7 GHz (5.6 GHz turbo)<br>
+                    Liczba rdzeni: 12 rdzeni<br>
+                    Liczba wątków: 24 wątków<br>
+                    Cache:76 MB<br><br>
+
+                    <strong>AMD Ryzen 7 7800X3D</strong><br>
+                    Taktowanie rdzenia: 4.2 GHz (5 GHz turbo)<br>
+                    Liczba rdzeni: 8 rdzeni<br>
+                    Liczba wątków: 16 wątków<br>
+                    Cache:96 MB<br><br>
+
+                    <strong>AMD Ryzen 9 7900X3D</strong><br>
+                    Taktowanie rdzenia: 4.4 GHz (5.6 GHz turbo)<br>
+                    Liczba rdzeni: 12 rdzeni<br>
+                    Liczba wątków: 24 wątków<br>
+                    Cache:128 MB`
+            },
+            {
+                name: "KARTA GRAFICZNA",
+                variants: {
+                    var1: {
+                        description: "ASROCK Radeon RX 7900 GRE CHALLENGER 16GB",
+                        price: 2555.34,
+                        proUrl: "https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%207900%20GRE%20Challenger%2016GB%20OC/index.pl.asp"
+                    },
+                    var2: {
+                        description: "Gigabyte RTX 4070 SUPER WindForce OC",
+                        price: 2780.00,
+                        proUrl: "https://www.gigabyte.com/Graphics-Card/GV-N407SWF3OC-12GD#kf"
+                    }
+                },
+                defaultvar: "var2",
+                descript: `
+                    <strong>ASROCK Radeon RX 7900 GRE CHALLENGER</strong><br>
+                    Pamięć: 16 GB<br>
+                    Maksymalne taktowanie rdzenia: 2293 MHz<br>
+                    Szyna pamięci: 256-bit<br>
+                    Długość: 269 mm<br>
+                    Zalecana moc zasilacza: 750 W<br><br>
+
+                    <strong>Gigabyte RTX 4070 SUPER WindForce OC</strong><br>
+                    Pamięć: 12 GB<br>
+                    Maksymalne taktowanie rdzenia: 2505 MHz<br>
+                    Szyna pamięci: 192-bit<br>
+                    Długość: 261 mm<br>
+                    Zalecana moc zasilacza: 750 W`
+            },
+            {
+                name: "PŁYTA GŁÓWNA",
+                variants: {
+                    var1: {
+                        description: "Gigabyte B650 EAGLE AX",
+                        price: 646.00,
+                        proUrl: "https://www.gigabyte.pl/products/page/mb/B650-EAGLE-AX/kf"
+                    },
+                    var2: {
+                        description: "Gigabyte B650 GAMING X AX V2",
+                        price: 781.97,
+                        proUrl: "https://www.gigabyte.pl/products/page/mb/B650-GAMING-X-AX-V2-rev-10/kf"
+                    },
+                    var3: {
+                        description: "Gigabyte X670 GAMING X AX V2",
+                        price: 821.00,
+                        proUrl: "https://www.gigabyte.pl/products/page/mb/X670-GAMING-X-AX-V2-rev-10/kf"
+                    },
+                    var4: {
+                        description: "Gigabyte X670 AORUS ELITE AX",
+                        price: 903.00,
+                        proUrl: "https://www.gigabyte.pl/products/page/mb/X670-AORUS-ELITE-AX-rev-10/kf"
+                    },
+                },
+                defaultvar: "var3",
+                descript: `
+                    <strong>Gigabyte B650 EAGLE AX</strong><br>
+                    Standard płyty: ATX<br>
+                    Sloty: 4 * PCI-E x16<br>
+                    Storage: 1 * M.2 PCIe 5.0, 2 * M.2 PCIe 4.0<br>
+                    Sata: 4 * SATA 6G<br><br>
+
+                    <strong>Gigabyte B650 GAMING X AX V2</strong><br>
+                    Standard płyty: ATX<br>
+                    Sloty: 3 * PCI-E x16<br>
+                    Storage: 1 * M.2 PCIe 5.0, 2 * M.2 PCIe 4.0<br>
+                    Sata: 4 * SATA 6G<br><br>
+                    
+                    <strong>Gigabyte X670 GAMING X AX V2</strong><br>
+                    Standard płyty: ATX<br>
+                    Sloty: 3 * PCI-E x16<br>
+                    Storage: 1 * M.2 PCIe 5.0, 3 * M.2 PCIe 4.0<br>
+                    Sata: 4 * SATA 6G<br><br>
+
+                    <strong>Gigabyte X670 AORUS ELITE AX</strong><br>
+                    Standard płyty: ATX<br>
+                    Sloty: 3 * PCI-E x16<br>
+                    Storage: 1 * M.2 PCIe 5.0, 3 * M.2 PCIe 4.0<br>
+                    Sata: 4 * SATA 6G`
+            },
+            {
+                name: "PAMIEĆ RAM",
+                variants: {
+                    var1: {
+                        description: "Patriot Viper Venom 32GB/6000 (2x16GB) DDR5 CL36",
+                        price: 423.00,
+                        proUrl: "https://viper.patriotmemory.com/products/viper-venom-ddr5-performance-ram"
+                    },
+                    var2: {
+                        description: "Lexar ARES RGB 32GB/6000 (2x16GB) DDR5 CL30",
+                        price: 487.83,
+                        proUrl: "https://www.lexar.com/product/lexar-ares-rgb-ddr5-desktop-memory-2/"
+                    },
+                },
+                defaultvar: "var1",
+                descript: `
+                    <strong>Patriot Viper Venom</strong><br>
+                    Opóźnienia (CL): 36<br>
+                    Rodzaj pamięci: DDR5<br>
+                    Pojemność całkowita: 32 GB (2x16 GB)<br>
+                    Taktowanie: 6000 MHz<br><br>
+                    
+                    <strong>Lexar ARES RGB</strong><br>
+                    Opóźnienia (CL): 30<br>
+                    Rodzaj pamięci: DDR5<br>
+                    Pojemność całkowita: 32 GB (2x16 GB)<br>
+                    Taktowanie: 6000 MHz`
+            },
+            {
+                name: "DYSK NA SYSTEM",
+                variants: {
+                    var1: {
+                        description: "Lexar NM620 1TB",
+                        price: 244.99,
+                        proUrl: "https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/"
+                    },
+                    var2: {
+                        description: "Lexar NM790 1TB",
+                        price: 323.64,
+                        proUrl: "https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/"
+                    },
+                    var3: {
+                        description: "Lexar NM620 2TB",
+                        price: 434.90,
+                        proUrl: "https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/"
+                    },
+                    var4: {
+                        description: "Lexar NM790 2TB",
+                        price: 511.00,
+                        proUrl: "https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/"
+                    },
+                },
+                defaultvar: "var2",
+                descript: `
+                    <strong>Lexar NM620</strong><br>
+                    Pojemność: 1000 GB / 2000 GB<br>
+                    Format: M.2<br>
+                    Interfejs: PCIe NVMe 4.0 x4<br>
+                    Prędkość odczytu (max): 3300 MB/s<br>
+                    Prędkość zapisu (max): 3000 MB/s<br><br>
+
+                    <strong>Lexar NM790</strong><br>
+                    Pojemność: 1000 GB / 2000 GB<br>
+                    Format: M.2<br>
+                    Interfejs: PCIe NVMe 4.0 x4<br>
+                    Prędkość odczytu (max): 7400 MB/s<br>
+                    Prędkość zapisu (max): 6500 MB/s`
+            },
+            {
+                name: "DYSK NA DANE",
+                variants: {
+                    var1: {
+                        description: "SEAGATE SKYHAWK 4TB",
+                        price: 362.32,
+                        proUrl: "https://www.seagate.com/pl/pl/products/video-analytics/skyhawk-hard-drive/"
+                    },
+                    var2: {
+                        description: "Lexar NM620 2TB",
+                        price: 434.90,
+                        proUrl: "https://www.lexar.com/product/lexar-nm620-m-2-2280-nvme-ssd/"
+                    },
+                    var3: {
+                        description: "Lexar NM790 2TB",
+                        price: 511.00,
+                        proUrl: "https://www.lexar.com/product/lexar-nm790-m-2-2280-pcie-gen-4x4-nvme-ssd/"
+                    },
+                },
+                defaultvar: "var2",
+                descript: `
+                    <strong>Seagate SkyHawk ST4000VX016</strong><br>
+                    Pojemność dysku: 4 TB<br>
+                    Typ dysku: HDD<br>
+                    Interfejs: SATA III<br>
+                    Prędkość obrotowa (obr./min.): 5400<br>
+                    Rozmiar bufora dysku pamięci: 256 MB<br>
+                    Prędkość odczytu (max): 180 MB/s<br>
+                    Prędkość zapisu (max): 180 MB/s<br><br>
+                    
+                    <strong>Lexar NM620</strong><br>
+                    Pojemność: 2000 GB<br>
+                    Format: M.2<br>
+                    Interfejs: PCIe NVMe 4.0 x4<br>
+                    Prędkość odczytu (max): 3300 MB/s<br>
+                    Prędkość zapisu (max): 3000 MB/s<br><br>
+
+                    <strong>Lexar NM790</strong><br>
+                    Pojemność:  2000 GB<br>
+                    Format: M.2<br>
+                    Interfejs: PCIe NVMe 4.0 x4<br>
+                    Prędkość odczytu (max): 7400 MB/s<br>
+                    Prędkość zapisu (max): 6500 MB/s`
+            },
+            {
+                name: "ZASILACZ",
+                variants: {
+                    var1: {
+                        description: "Gigabyte GP-UD750GM ATX 3.0",
+                        price: 359.00,
+                        url: "https://www.x-kom.pl/p/1246121-zasilacz-do-komputera-gigabyte-ud750gm-pg5-750w-80-plus-gold-atx-30.html",
+                        proUrl: "https://www.gigabyte.com/Power-Supply/GP-UD750GM-PG5#kf"
+                    },
+                    var2: {
+                        description: "Endorfy Supremo FM5 Gold 750W",
+                        price: 389.00,
+                        proUrl: "https://endorfy.com/pl/product/supremo-fm5-gold-750w/"
+                    },
+                    var3: {
+                        description: "MPG A850G PCIE5",
+                        price: 427.93,
+                        proUrl: "https://endorfy.com/pl/product/supremo-fm5-gold-850w/"
+                    },
+                },
+                defaultvar: "var1",
+                descript: `
+                    <strong>Gigabyte GP-UD750GM ATX 3.0</strong><br>
+                    Standard: ATX 3.0<br>
+                    Moc zasilacza: 750 W<br>
+                    Certyfikat: 80 PLUS Gold<br>
+                    Modularne okablowanie: w pełni modularne<br>
+                    Chłodzenie: wentylator 120 mm<br><br>
+
+                    <strong>Endorfy Supremo FM5 EY7A008 750W Gold</strong><br>
+                    Standard: ATX<br>
+                    Moc zasilacza: 750 W<br>
+                    Certyfikat: 80 PLUS Gold<br>
+                    Modularne okablowanie: w pełni modularne<br>
+                    Chłodzenie: wentylator 120 mm<br><br>
+
+                    <strong>MSI MPG A850G PCIE5 850w 80Plus Gold</strong><br>
+                    Standard: ATX<br>
+                    Moc zasilacza: 850 W<br>
+                    Certyfikat: 80 PLUS Gold<br>
+                    Modularne okablowanie: w pełni modularne<br>
+                    Chłodzenie: wentylator 135 mm<br><br>
+                    <a href="https://cultists.network/140/psu-tier-list/" target="_blank">lista zasilaczy</a>`
+                    
+            },
+            {
+                name: "OBUDOWA",
+                variants: {
+                    var1: {
+                        description: "ENDORFY Arx 500",
+                        price: 379.00,
+                        proUrl: "https://endorfy.com/pl/product/arx-500-air/"
+                    },
+                    var2: {
+                        description: "ENDORFY Arx 700",
+                        price: 398.00,
+                        proUrl: "https://endorfy.com/pl/product/arx-700-air/"
+                    },
+                },
+                defaultvar: "var2",
+                descript: `
+                    <strong>ENDORFY Arx 500</strong><br>
+                    Typ: Middle Tower<br>
+                    Wentylatory: 5 (var rgb 4)<br>
+                    Miejsca na dyski: 6 x 2,5", 1 x 3,5"/2,5"<br>
+                    Max długość karty: 350 mm<br>
+                    Max chłodnica góra: 280 mm<br><br>
+
+                    <strong>ENDORFY Arx 700</strong><br>
+                    Typ: Middle Tower<br>
+                    Wentylatory: 5 (var rgb 4)<br>
+                    Miejsca na dyski: 6 x 2,5", 1 x 3,5"/2,5"<br>
+                    Max długość karty: 410 mm<br>
+                    Max chłodnica góra: 360 mm`
+            },
+            {
+                name: "CHŁODZENIE",
+                variants: {
+                    var1: {
+                        description: "ARCTIC LIQUID FREEZER III 240 BLACK",
+                        price: 232.74,
+                        proUrl: "https://www.arctic.de/en/Liquid-Freezer-III-240/ACFRE00134A"
+                    },
+                    var2: {
+                        description: "ARCTIC LIQUID FREEZER III 280 A-RGB BLACK",
+                        price: 281.99,
+                        proUrl: "https://www.arctic.de/en/Liquid-Freezer-III-280/ACFRE00135A"
+                    },
+                    var3: {
+                        description: "ARCTIC LIQUID FREEZER III 360 BLACK",
+                        price: 302.99,
+                        proUrl: "https://www.arctic.de/en/Liquid-Freezer-III-360/ACFRE00136A"
+                    },
+                },
+                defaultvar: "var3",
+                descript: `
+                    <strong>Wentylator:<br>2x 120 mm<br>2x 140 mm<br>3x 120 mm</strong><br><br>
+                    Rodzaj chłodzenia:Wodne<br>
+                    Kontrola obrotów: PWM<br>
+                    Prędkość obrotowa: 200 - 1800 obr./min`
+            },
+        ];
+
+        const fullPath = decodeURIComponent(location.pathname.split('/').pop());
+
+        const fileName = fullPath.substring(0, fullPath.lastIndexOf('.'));
+
+        document.title = fileName;
+
+        const header = document.getElementById('file-name-header');
+        header.innerText = fileName;
+
+        function createProductItem(product, index) {
+        const item = document.createElement('div');
+        item.className = 'product-item';
+        item.dataset.index = index;
+
+        const info = document.createElement('div');
+        info.className = 'product-info';
+        const defaultVariant = product.variants[product.defaultvar];
+        info.innerHTML = `
+            <span class="product-name">${defaultVariant.description}</span>
+            <span class="product-price" data-original-price="${defaultVariant.price.toFixed(2).replace('.', ',')}" onclick="editPrice(event, ${index})">${defaultVariant.price.toFixed(2).replace('.', ',')} PLN</span>
+        `;
+        item.appendChild(info);
+
+        const actions = document.createElement('div');
+        actions.className = 'product-actions';
+
+        const variantsBtn = document.createElement('button');
+        variantsBtn.className = 'action-btn';
+        variantsBtn.innerText = 'WARIANTY';
+        variantsBtn.onclick = () => showVariants(product, index);
+        actions.appendChild(variantsBtn);
+
+        const auctionBtn = document.createElement('button');
+        auctionBtn.className = 'action-btn';
+        auctionBtn.innerText = 'SZUKAJ';
+        auctionBtn.onclick = () => {
+            const defaultVariant = product.variants[product.defaultvar];
+            if (defaultVariant.url) {
+                window.open(defaultVariant.url, '_blank');
+            } else {
+                const searchQuery = defaultVariant.description.replace(/ /g, '%20');
+                const searchUrl = `https://allegro.pl/kategoria/komputery?string=${searchQuery}&allegro-smart-standard=1&miejsce-wysylki=polska&order=p&stan=nowe`;
+                window.open(searchUrl, '_blank');
+            }
+        };
+        actions.appendChild(auctionBtn);
+
+        const producerBtn = document.createElement('button');
+        producerBtn.className = 'action-btn';
+        producerBtn.innerText = 'PRODUCENT';
+        producerBtn.onclick = () => {
+            window.open(defaultVariant.proUrl, '_blank');
+        };
+        actions.appendChild(producerBtn);
+
+        const descriptionBtn = document.createElement('button');
+        descriptionBtn.className = 'action-btn';
+        descriptionBtn.innerText = 'OPIS';
+        descriptionBtn.onclick = () => showDescription(product.descript);
+        actions.appendChild(descriptionBtn);
+
+        item.appendChild(actions);
+        return item;
+    }
+
+    function showVariants(product, index) {
+    const modal = document.getElementById('variants-modal');
+    const variantsText = document.getElementById('variants-text');
+    variantsText.innerHTML = '';
+
+    const variantsList = document.createElement('div');
+    variantsList.className = 'variants-list';
+
+    Object.entries(product.variants).forEach(([key, variant]) => {
+        const variantDiv = document.createElement('div');
+        variantDiv.className = 'variant-option';
+        variantDiv.innerHTML = `
+            <span class="variant-name">${variant.description}</span>
+            <div class="variant-price">${variant.price.toFixed(2).replace('.', ',')} PLN</div>
+        `;
+        variantDiv.onclick = () => {
+            const productInfo = document.querySelector(`.product-item[data-index='${index}'] .product-info`);
+            productInfo.querySelector('.product-name').innerText = variant.description;
+            productInfo.querySelector('.product-price').innerText = `${variant.price.toFixed(2).replace('.', ',')} PLN`;
+
+            const searchQuery = variant.description.replace(/ /g, '%20');
+            const buttons = document.querySelectorAll(`.product-item[data-index='${index}'] .product-actions .action-btn`);
+
+            buttons[1].onclick = () => {
+                if (variant.url) {
+                    window.open(variant.url, '_blank');
+                } else {
+                    const searchUrl = `https://allegro.pl/kategoria/komputery?string=${searchQuery}&allegro-smart-standard=1&miejsce-wysylki=polska&order=p&stan=nowe`;
+                    window.open(searchUrl, '_blank');
+                }
+            };
+
+            buttons[2].onclick = () => {
+                if (variant.proUrl) {
+                    window.open(variant.proUrl, '_blank');
+                } else {
+                    alert('Manufacturer link is not available for this variant.');
+                }
+            };
+
+            modal.style.display = 'none';
+            updateTotalPrice();
+        };
+        variantsList.appendChild(variantDiv);
+    });
+
+    variantsText.appendChild(variantsList);
+    modal.style.display = 'flex';
+}
+
+        function showDescription(description) {
+            const modal = document.getElementById('description-modal');
+            const descriptionText = document.getElementById('description-text');
+            descriptionText.innerHTML = description;
+            modal.style.display = 'flex';
+        }
+
+        function editPrice(event, index) {
+            const priceElement = event.target;
+            const currentPrice = parseFloat(priceElement.innerText.replace(',', '.').replace(' PLN', ''));
+            const originalPrice = priceElement.dataset.originalPrice;
+
+            if (!originalPrice) {
+                priceElement.dataset.originalPrice = currentPrice.toFixed(2);
+            }
+
+            const newPrice = prompt("Wprowadź nową cenę (PLN):", currentPrice);
+            if (newPrice !== null) {
+                const parsedPrice = parseFloat(newPrice.replace(',', '.'));
+                if (!isNaN(parsedPrice)) {
+
+                    const oldPriceElements = priceElement.querySelectorAll('.old-price');
+                    oldPriceElements.forEach(el => el.remove());
+
+                    const oldPriceElement = document.createElement('span');
+                    oldPriceElement.className = 'old-price';
+                    oldPriceElement.style.opacity = '0.5';
+                    oldPriceElement.style.cursor = 'default';
+                    oldPriceElement.innerText = ` (${priceElement.dataset.originalPrice} PLN)`;
+
+                    priceElement.innerHTML = `${parsedPrice.toFixed(2).replace('.', ',')} PLN`;
+                    priceElement.appendChild(oldPriceElement);
+
+                    updateTotalPrice();
+                } else {
+                    priceElement.innerHTML = `${currentPrice.toFixed(2).replace('.', ',')} PLN`;
+                }
+            }
+        }
+
+        function updateTotalPrice() {
+            let totalSum = products.reduce((sum, product, index) => {
+                const productInfo = document.querySelector(`.product-item[data-index='${index}'] .product-info .product-price`);
+                const priceText = productInfo.innerText.split(' ')[0].replace(',', '.');
+                const price = parseFloat(priceText);
+                return sum + (isNaN(price) ? 0 : price);
+            }, 0);
+            document.getElementById('total-price').innerText = `Suma: ${totalSum.toFixed(2).replace('.', ',')} PLN`;
+        }
+
+        const descriptionModal = document.getElementById('description-modal');
+        const closeDescriptionModalBtn = document.getElementById('close-description-modal');
+        closeDescriptionModalBtn.onclick = () => {
+            descriptionModal.style.display = 'none';
+        }
+
+        const variantsModal = document.getElementById('variants-modal');
+        const closeVariantsModalBtn = document.getElementById('close-variants-modal');
+        closeVariantsModalBtn.onclick = () => {
+            variantsModal.style.display = 'none';
+        }
+
+        function setupOutsideClickClose(modal) {
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        setupOutsideClickClose(descriptionModal);
+        setupOutsideClickClose(variantsModal);
+
+        const productList = document.getElementById('product-list');
+        products.forEach((product, index) => {
+            const productItem = createProductItem(product, index);
+            productList.appendChild(productItem);
+        });
+
+        updateTotalPrice();
+
+    </script>
+
+</body>
+
+</html>
